@@ -162,6 +162,9 @@ def vcprompt(options):
         if options.path != os.getcwd():
             os.chdir(options.path)
 
+        if os.path.exists(".novcprompt"):
+            return "[-] "
+
         for vcs in SYSTEMS:
             for vfile in vcs.files:
                 if not os.path.exists(vfile):
