@@ -163,6 +163,9 @@ def vcprompt(options):
         if options.path != os.getcwd():
             os.chdir(options.path)
 
+        if os.path.exists(".novcprompt"):
+            return "[-] "
+
         for vcs in SYSTEMS:
             for vfile in vcs.files:
                 if not os.path.exists(vfile):
@@ -190,6 +193,7 @@ def vcprompt(options):
                 prompt = prompt.replace("%m", conf.get('modified', ''))
                 prompt = prompt.replace("%u", conf.get('untracked', ''))
                 prompt = prompt.replace("%a", conf.get('staged', ''))
+                prompt = prompt.replace("%t", conf.get('stashed', ''))
                 prompt = prompt.replace("%s", vcs.__name__)
                 prompt = prompt.replace("%n", vcs.__name__)
                 prompt = prompt.replace("%P", os.path.basename(options.path))
@@ -428,7 +432,7 @@ def git(options):
 
     The fast version control system.
     """
-    staged = branch = sha = modified = untracked = options.unknown
+    staged = branch = sha = modified = untracked = stashed = options.unknown
 
     if os.path.isfile(options.file):
         fn = open(options.file, 'r').read().rstrip('\n').split(' ', 1)[1]
@@ -506,6 +510,16 @@ def git(options):
         else:
             staged = ''
 
+    # stashed
+    if '%t' in options.format:
+        output, returncode = popen('git stash list --exit-code')
+
+        stashed = ''
+
+        if returncode == 1:
+            stash_count = output.count('\n')
+            stashed = "{" + str(stash_count) + "}"
+
     # formatting
     return {
         'branch': branch,
@@ -513,6 +527,7 @@ def git(options):
         'modified': modified,
         'untracked': untracked,
         'staged': staged,
+        'stashed': stashed,
     }
 
 
