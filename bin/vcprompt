@@ -280,7 +280,7 @@ def bzr(options):
     }
 
 
-@vcs(["CVS"])
+@vcs(["CVSROOT/config"])
 def cvs(options):
     """
     CVS
@@ -527,7 +527,7 @@ def hg(options):
 
     # changeset ID or global sha
     if re.search('%(r|h)', options.format):
-        fns = ['cache/branchheads', 'cache/branchheads-served']
+        fns = ['cache/branchheads', 'cache/branchheads-served', 'cache/branch2-served']
         for fn in fns:
             try:
                 fh = open(os.path.join(options.file, fn), 'r')
@@ -572,7 +572,7 @@ def hg(options):
     }
 
 
-@vcs([".svn/entries"])
+@vcs([".svn/entries", ".svn/wc.db"])
 def svn(options):
     """
     Subversion
