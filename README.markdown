@@ -3,8 +3,9 @@ vcprompt
 
 Version control information in your prompt.
 
-***This project is not under active development. Forks are encouraged!***
-
+This project is forked from https://github.com/djl/vcprompt since the original
+project is no longer under active development. I am taking this project up for
+minor maintenance.
 
 
 INSTALL

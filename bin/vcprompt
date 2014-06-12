@@ -512,12 +512,12 @@ def git(options):
 
     # stashed
     if '%t' in options.format:
-        output, returncode = popen('git stash list --exit-code')
+        output, returncode = popen('git stash list')
 
         stashed = ''
+        stash_count = output.count('\n')
 
-        if returncode == 1:
-            stash_count = output.count('\n')
+        if stash_count > 0:
             stashed = "{" + str(stash_count) + "}"
 
     # formatting
