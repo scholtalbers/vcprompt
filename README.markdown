@@ -3,7 +3,7 @@ vcprompt
 
 Version control information in your prompt.
 
-This project is forked from https://github.com/maverickwoo/vcprompt since the original
+This project is forked from https://github.com/djl/vcprompt since the original
 project is no longer under active development. I am taking this project up for
 minor maintenance.
 
@@ -13,7 +13,7 @@ INSTALL
 
 Download vcprompt, make it executable and add it to your prompt:
 
-    $ curl -sL https://github.com/djl/vcprompt/raw/master/bin/vcprompt > ~/bin/vcprompt
+    $ curl -sL https://github.com/maverickwoo/vcprompt/raw/master/bin/vcprompt > ~/bin/vcprompt
     $ chmod 755 ~/bin/vcprompt
 
 For bash, you'll want to do something like this:
