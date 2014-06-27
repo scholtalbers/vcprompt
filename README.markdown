@@ -3,7 +3,7 @@ vcprompt
 
 Version control information in your prompt.
 
-This project is forked from https://github.com/djl/vcprompt since the original
+This project is forked from https://github.com/maverickwoo/vcprompt since the original
 project is no longer under active development. I am taking this project up for
 minor maintenance.
 
