@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Usage: vcprompt [options]
 
@@ -484,10 +485,11 @@ def git(options):
 
     # modified
     if '%m' in options.format:
-        output, returncode = popen('git diff --quiet --exit-code')
+        output, returncode = popen('git diff --numstat --exit-code')
 
         if returncode == 1:
-            modified = options.modified
+            modified_count = output.count('\n')
+            modified = options.modified + " " + str(modified_count)
         else:
             modified = ''
 
@@ -497,16 +499,18 @@ def git(options):
 
         if returncode == 0:
             if output:
-                untracked = options.untracked
+                untracked_count = output.count('\n')
+                untracked = options.untracked + str(untracked_count)
             else:
                 untracked = ''
 
     # staged files
     if '%a' in options.format:
-        output, returncode = popen('git diff --quiet --cached --exit-code')
+        output, returncode = popen('git diff --numstat --cached --exit-code')
 
         if returncode == 1:
-            staged = options.staged
+            staged_count = output.count('\n')
+            staged = options.staged + str(staged_count)
         else:
             staged = ''
 
@@ -518,7 +522,7 @@ def git(options):
         stash_count = output.count('\n')
 
         if stash_count > 0:
-            stashed = "{" + str(stash_count) + "}"
+            stashed = "⚑ " + str(stash_count)
 
     # formatting
     return {
@@ -625,12 +629,24 @@ def svn(options):
             staged = ''
             if output:
                 codes = [line.strip()[0:1] for line in output.split('\n')]
+                modified_count = 0
+                untracked_count = 0
+                staged_count = 0
+                for code in codes:
+                    if re.search('[CDMR!]', ''.join(code)):
+                        modified_count += 1
+                    if '?' in code:
+                        untracked_count += 1
+                    if 'A' in code:
+                        staged_count += 1
                 if re.search('[CDMR!]', ''.join(codes)):
-                    modified = options.modified
+                    modified = options.modified + " " + str(modified_count)
                 if '?' in codes:
-                    untracked = options.untracked
+                    untracked = options.untracked + str(untracked_count)
                 if 'A' in codes:
-                    staged = options.staged
+                    staged = options.staged + str(staged_count)
+
+                
 
     # formatting
     return {
