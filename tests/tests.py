@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from subprocess import Popen, PIPE
 import os
 import re
@@ -126,7 +127,10 @@ class BaseTest(object):
         f.close()
 
         output = self.vcprompt(format=string)
-        self.assertEqual(output, '+')
+        # Some have '+', some have '+1'
+        self.assertTrue(output.startswith(u'\u271a'))
+        if len(output) > len(u'\u271a'):
+            self.assertEqual(output, u'\u271a1')
 
         self.revert()
 
@@ -157,7 +161,10 @@ class BaseTest(object):
         self.touch(file)
 
         output = self.vcprompt(format=string)
-        self.assertEqual(output, '?')
+        # Some have '...', some have '...1'
+        self.assertTrue(output.startswith(u'\u2026'))
+        if len(output) > len(u'\u2026'):
+            self.assertEqual(output, u'\u20261')
 
         os.remove(file)
 
@@ -210,7 +217,12 @@ class BaseTest(object):
         quotes.close()
 
         output = self.vcprompt(format=string, **chars)
-        self.assertEqual(output, string.replace('%', ''))
+        # Some can count the items, and add them in the output.
+        expected = string.replace('%', '')
+        if '1' in output:
+            # Turn 'amu' into 'a1m1u1'.
+            expected = '1'.join(expected) + '1'
+        self.assertEqual(output, expected)
 
         os.remove(untracked)
         self.revert()

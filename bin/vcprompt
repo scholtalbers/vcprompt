@@ -492,7 +492,7 @@ def git(options):
 
         if returncode == 1:
             modified_count = output.count('\n')
-            modified = options.modified + " " + str(modified_count)
+            modified = options.modified + str(modified_count)
         else:
             modified = ''
 
@@ -647,7 +647,7 @@ def svn(options):
                     if 'A' in code:
                         staged_count += 1
                 if re.search('[CDMR!]', ''.join(codes)):
-                    modified = options.modified + " " + str(modified_count)
+                    modified = options.modified + str(modified_count)
                 if '?' in codes:
                     untracked = options.untracked + str(untracked_count)
                 if 'A' in codes:
