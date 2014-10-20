@@ -182,6 +182,9 @@ def vcprompt(options):
 
                 conf = vcs(options)
                 prompt = options.format
+                for key, value in conf.items():
+                    if isinstance(value, unicode):
+                        conf[key] = value.encode('utf-8')
 
                 # Get hash and revision, with fallback to each other
                 hash = conf.get('hash', conf.get('revision', unknown))
@@ -620,6 +623,8 @@ def svn(options):
         if re.search('%(r|h)', options.format):
             tag = dom.getElementsByTagName('commit')[0]
             revision = tag.getAttribute('revision')
+            if isinstance(revision, unicode):
+                revision = revision.encode('utf-8')
 
     # modified/staged/untracked
     if re.search('%[amu]', options.format):
