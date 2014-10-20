@@ -613,6 +613,8 @@ def svn(options):
             matches = re.search(regex, tag.childNodes[0].data)
             if matches:
                 branch = matches.groups(0)[0]
+                if isinstance(branch, unicode):
+                    branch = branch.encode('utf-8')
 
         # revision/sha
         if re.search('%(r|h)', options.format):
