@@ -66,13 +66,13 @@ except ImportError:
     except ImportError:
         has_sqlite3 = False
 
-# user editable options
+# user options
 FORMAT = os.environ.get('VCPROMPT_FORMAT', '%s:%b')
-UNKNOWN = os.environ.get('VCPROMPT_UNKNOWN', '(unknown)')
 TIMEOUT = os.environ.get('VCPROMPT_TIMEOUT', 0)
 SYSTEMS = []
 
 # status indicators
+UNKNOWN = os.environ.get('VCPROMPT_UNKNOWN', '(unknown)')
 STAGED = os.environ.get('VCPROMPT_STAGED', '*')       #a
 MODIFIED = os.environ.get('VCPROMPT_MODIFIED', '+')   #m
 STASHED = os.environ.get('VCPROMPT_STASHED', '_')     #t
