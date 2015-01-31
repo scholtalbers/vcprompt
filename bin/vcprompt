@@ -72,9 +72,9 @@ TIMEOUT = os.environ.get('VCPROMPT_TIMEOUT', 0)
 SYSTEMS = []
 
 # status indicators
-STAGED = os.environ.get('VCPROMPT_STAGED', '●')
-MODIFIED = os.environ.get('VCPROMPT_MODIFIED', '✚')
-UNTRACKED = os.environ.get('VCPROMPT_UNTRACKED', '…')
+STAGED = os.environ.get('VCPROMPT_STAGED', '*')
+MODIFIED = os.environ.get('VCPROMPT_MODIFIED', '+')
+UNTRACKED = os.environ.get('VCPROMPT_UNTRACKED', '\?')
 
 
 def popen(command, stdout=PIPE, stderr=PIPE):
@@ -190,19 +190,50 @@ def vcprompt(options):
                 hash = conf.get('hash', conf.get('revision', unknown))
                 revision = conf.get('revision', conf.get('hash', unknown))
 
+                regex = re.compile('{(.*)}')
+
+                def get_group(string):
+                                match = regex.search(string)
+                                if match:
+                                    return match.group(1)
+                                else:
+                                    return ''
+
+                format_strings = prompt.split("%")[1:]
+                format_dict = {"%{}".format(fmt[:1]): "{:%ss}" % get_group(fmt[1:]) for fmt in format_strings}
+
+                prompt = re.sub('{.*}', '', prompt)
+
+                default_format = "{:s}"
+
+                prompt_format = {"%b": (lambda: conf.get('branch', unknown)),
+                                 "%r": (lambda: revision),
+                                 "%h": (lambda: hash),
+                                 "%m": (lambda: conf.get('modified', '')),
+                                 "%u": (lambda: conf.get('untracked', '')),
+                                 "%a": (lambda: conf.get('staged', '')),
+                                 "%t": (lambda: conf.get('stashed', '')),
+                                 "%s": (lambda: vcs.__name__),
+                                 "%n": (lambda: vcs.__name__),
+                                 "%P": (lambda: os.path.basename(options.path)),
+                                 "%p": (lambda: relpath(original_path, options.path))}
+
+                for (key, func) in prompt_format.iteritems():
+                    prompt = prompt.replace(key, format_dict.get(key, default_format).format(func()))
+
                 # Substitute stuff
-                prompt = prompt.replace("%b", conf.get('branch', unknown))
-                prompt = prompt.replace("%r", revision)
-                prompt = prompt.replace("%h", hash)
-                prompt = prompt.replace("%m", conf.get('modified', ''))
-                prompt = prompt.replace("%u", conf.get('untracked', ''))
-                prompt = prompt.replace("%a", conf.get('staged', ''))
-                prompt = prompt.replace("%t", conf.get('stashed', ''))
-                prompt = prompt.replace("%s", vcs.__name__)
-                prompt = prompt.replace("%n", vcs.__name__)
-                prompt = prompt.replace("%P", os.path.basename(options.path))
-                prompt = prompt.replace("%p", relpath(original_path,
-                                                      options.path))
+                # prompt = prompt.replace("%b", format_dict.get('b', default_format).format(conf.get('branch', unknown)))
+                # prompt = prompt.replace("%r", revision)
+                # prompt = prompt.replace("%h", hash)
+                # prompt = prompt.replace("%m", conf.get('modified', ''))
+                # prompt = prompt.replace("%u", conf.get('untracked', ''))
+                # prompt = prompt.replace("%a", conf.get('staged', ''))
+                # prompt = prompt.replace("%t", conf.get('stashed', ''))
+                # prompt = prompt.replace("%s", vcs.__name__)
+                # prompt = prompt.replace("%n", vcs.__name__)
+                # prompt = prompt.replace("%P", os.path.basename(options.path))
+                # prompt = prompt.replace("%p", relpath(original_path,
+                #                                       options.path))
                 return prompt
 
         options.path = options.path.rsplit('/', 1)[0]
@@ -653,7 +684,7 @@ def svn(options):
                 if 'A' in codes:
                     staged = options.staged + str(staged_count)
 
-                
+
 
     # formatting
     return {
