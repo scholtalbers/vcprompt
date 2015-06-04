@@ -309,14 +309,34 @@ def bzr(options):
     }
 
 
-@vcs(['CVSROOT/config'])
+@vcs(['CVS/Root'])
 def cvs(options):
     """
     CVS
 
     Concurrent Versions System.
     """
-    return {}
+    # status (modified/untracked)
+    if re.search('%[mu]', options.format):
+        output, returncode = popen('cvs -Q status -R')
+
+        modified = ''
+        untracked = ''
+
+        if returncode == 0:
+            if output:
+                for line in output.splitlines():
+                    line = line.strip()
+                    if line.startswith('?'):
+                        untracked = options.untracked
+                    elif line.count('Locally Modified'):
+                        modified = options.modified
+
+    # formatting
+    return {
+        'modified': modified,
+        'untracked': untracked,
+    }
 
 
 @vcs(['_darcs/hashed_inventory'])
