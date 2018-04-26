@@ -78,6 +78,26 @@ MODIFIED = os.environ.get('VCPROMPT_MODIFIED', '+')   #m
 STASHED = os.environ.get('VCPROMPT_STASHED', '_')     #t
 UNTRACKED = os.environ.get('VCPROMPT_UNTRACKED', '?') #u
 
+# colors
+BLUE = "\033[34m"
+RED = "\033[91m"
+GREEN = "\033[92m"
+YELLOW = "\033[93m"
+LIGHT_PURPLE = "\033[94m"
+PURPLE = "\033[95m"
+CYAN = "\033[96m"
+BLACK = "\033[00m"
+RESET = "\033[0m"
+
+STATUS_COLORS = {
+    'C': GREEN, # CLEAN
+    'S': PURPLE,# STAGED
+    'M': RED,   # MODIFIED
+}
+
+def color_format(color, value):
+    return "{} {}{}".format(color, value, RESET)
+
 
 def popen(command, stdout=PIPE, stderr=PIPE):
     try:
@@ -182,7 +202,7 @@ def vcprompt(options):
                 # the 'vcs' file
                 options.file = vfile
 
-                conf = vcs(options)
+                conf = vcs(options, get_general_status=options.color)
                 prompt = options.format
                 for key, value in conf.items():
                     if isinstance(value, unicode):
@@ -195,11 +215,11 @@ def vcprompt(options):
                 regex = re.compile('{(.*)}')
 
                 def get_group(string):
-                                match = regex.search(string)
-                                if match:
-                                    return match.group(1)
-                                else:
-                                    return ''
+                    match = regex.search(string)
+                    if match:
+                        return match.group(1)
+                    else:
+                        return ''
 
                 format_strings = prompt.split('%')[1:]
                 format_dict = {'%{}'.format(fmt[:1]): '{:%ss}' % get_group(fmt[1:]) for fmt in format_strings}
@@ -207,6 +227,12 @@ def vcprompt(options):
                 prompt = re.sub('{.*}', '', prompt)
 
                 default_format = '{:s}'
+
+                status = 'C'
+                if conf.get('modified'):
+                    status = 'M'
+                elif conf.get('staged'):
+                    status = 'S'
 
                 prompt_format = {'%b': (lambda: conf.get('branch', unknown)),
                                  '%r': (lambda: revision),
@@ -218,11 +244,14 @@ def vcprompt(options):
                                  '%s': (lambda: vcs.__name__),
                                  '%n': (lambda: vcs.__name__),
                                  '%P': (lambda: os.path.basename(options.path)),
-                                 '%p': (lambda: relpath(original_path, options.path))}
+                                 '%p': (lambda: relpath(original_path, options.path)),
+                                 '%S': (lambda: status)
+                }
 
                 for (key, func) in prompt_format.iteritems():
                     prompt = prompt.replace(key, format_dict.get(key, default_format).format(func()))
-
+                if options.color:
+                    prompt = color_format(STATUS_COLORS[status], prompt)
                 return prompt
 
         options.path = options.path.rsplit('/', 1)[0]
@@ -244,7 +273,7 @@ def main():
     parser.add_option('-U', '--untracked', dest='untracked', default=UNTRACKED)
     parser.add_option('-u', '--unknown', dest='unknown', default=UNKNOWN)
     parser.add_option('-v', '--version', action='callback', callback=version)
-
+    parser.add_option('-c', '--color', action='store_true', dest='color', default=False)
     # vcs-specific formatting
     for system in SYSTEMS:
         default = 'VCPROMPT_FORMAT_%s' % system.__name__.upper()
@@ -471,7 +500,7 @@ def fossil(options):
 
 
 @vcs(['.git'])
-def git(options):
+def git(options, get_general_status=False):
     """
     Git
 
@@ -528,7 +557,7 @@ def git(options):
             sha = revstring(sha_file)
 
     # modified
-    if '%m' in options.format:
+    if get_general_status or '%m' in options.format:
         output, returncode = popen('git diff --numstat --exit-code')
 
         if returncode == 1:
@@ -549,7 +578,7 @@ def git(options):
                 untracked = ''
 
     # staged files
-    if '%a' in options.format:
+    if get_general_status or '%a' in options.format:
         output, returncode = popen('git diff --numstat --cached --exit-code')
 
         if returncode == 1:

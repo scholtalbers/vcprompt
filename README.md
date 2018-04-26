@@ -49,6 +49,10 @@ first:
 
   The maximum execution time in milliseconds.
 
+* `-c, --color`
+
+  Add basic coloring for git.
+
 * `-h, --help`
 
   Prints the help message and exists.
@@ -136,6 +140,10 @@ all the available tokens:
   The relative path from the repository root directory to the current directory
   (or the directory specified by `--path`).
 
+* `%S`
+
+  A one letter indicator of the status of the repo, currently `C` for clean/up-to-date,
+  `M` for modified and `S` for staged.
 
 ## Requirements
 
